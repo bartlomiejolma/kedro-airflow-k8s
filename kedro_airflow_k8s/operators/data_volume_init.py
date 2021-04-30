@@ -2,9 +2,9 @@
 Module contains Apache Airflow operator that initialize attached PV with data sourced
  from image.
 """
-
-from airflow.kubernetes.pod_generator import PodGenerator
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
+import uuid
+from airflow.contrib.kubernetes.pod_generator import PodGenerator
+from airflow.contrib.operators.kubernetes_pod_operator import (
     KubernetesPodOperator,
 )
 
@@ -46,10 +46,13 @@ class DataVolumeInitOperator(KubernetesPodOperator):
         self._source = source
 
         super().__init__(
+            name=task_id,
             task_id=task_id,
+            image=image,
+            namespace=namespace,
             is_delete_operator_pod=True,
             startup_timeout_seconds=startup_timeout,
-            pod_template_file=self.definition,
+            config_file=self.definition,
             image_pull_policy=image_pull_policy,
         )
 
@@ -93,4 +96,4 @@ spec:
         collide with parallel runs.
         :return:
         """
-        return PodGenerator.make_unique_pod_id("data-volume-init")
+        return f"data-volume-init.{uuid.uuid4().hex}"

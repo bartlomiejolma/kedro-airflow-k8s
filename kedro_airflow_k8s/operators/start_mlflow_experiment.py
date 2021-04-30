@@ -4,7 +4,7 @@ Module contains Apache Airflow operator that starts experiment in mlflow.
 import logging
 from typing import Dict
 
-from airflow.operators.python import BaseOperator
+from airflow.operators.python_operator import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
 

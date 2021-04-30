@@ -67,6 +67,10 @@ run_config:
         #__default__:
             # Optional labels to be put into pod node selector
             #labels:
+                #Labels are applied to pods
+                #label_key: label_value
+            # Optional labels to be put into pod node selector
+            #node_selectors:
                 #Labels are user provided key value pairs
                 #label_key: label_value
             #requests:
@@ -83,6 +87,10 @@ run_config:
         #custom_resource_config_name:
             # Optional labels to be put into pod node selector
             #labels:
+                #Labels are applied to pods
+                #label_key: label_value
+            # Optional labels to be put into pod node selector
+            #node_selectors:
                 #Labels are user provided key value pairs
                 #label_key: label_value
             #requests:
@@ -132,6 +140,19 @@ class ResourceNodeConfig(Config):
 
 
 class ResourceConfig(Config):
+
+    @property
+    def annotations(self):
+        return self._get_or_fail("annotations")
+
+    @property
+    def tolerations(self):
+        return self._get_or_default("tolerations", {})
+
+    @property
+    def node_selectors(self):
+        return self._get_or_default("node_selectors", {})
+
     @property
     def labels(self):
         return self._get_or_default("labels", {})

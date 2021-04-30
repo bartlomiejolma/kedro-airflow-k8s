@@ -3,10 +3,11 @@ Module contains Apache Airflow operator that creates k8s pod for execution of
 kedro node.
 """
 
-from typing import Dict, Optional
+import uuid
+from typing import List, Dict, Optional
 
-from airflow.kubernetes.pod_generator import PodGenerator
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
+from airflow.contrib.kubernetes.pod_generator import PodGenerator
+from airflow.contrib.operators.kubernetes_pod_operator import (
     KubernetesPodOperator,
 )
 from kubernetes.client import models as k8s
@@ -37,6 +38,9 @@ class NodePodOperator(KubernetesPodOperator):
         limits_cpu: Optional[str] = None,
         limits_memory: Optional[str] = None,
         node_selector_labels: Optional[Dict[str, str]] = None,
+        labels: Optional[Dict[str, str]] = None,
+        tolerations: Optional[List[Dict[str, str]]] = None,
+        annotations: Optional[Dict[str, str]] = None,
         source: str = "/home/kedro/data",
     ):
         """
@@ -67,6 +71,7 @@ class NodePodOperator(KubernetesPodOperator):
         self._mlflow_enabled = mlflow_enabled
 
         super().__init__(
+            name=task_id,
             task_id=task_id,
             security_context=self.create_security_context(
                 volume_disabled, volume_owner
@@ -94,8 +99,11 @@ class NodePodOperator(KubernetesPodOperator):
             ),
             startup_timeout_seconds=startup_timeout,
             is_delete_operator_pod=True,
-            pod_template_file=self.minimal_pod_template,
-            node_selector=node_selector_labels,
+            config_file=self.minimal_pod_template,
+            node_selectors=node_selector_labels,
+            labels=labels,
+            tolerations=tolerations,
+            annotations=annotations
         )
 
     @staticmethod
@@ -110,17 +118,17 @@ class NodePodOperator(KubernetesPodOperator):
         :param limits_memory:
         :return:
         """
-        requests = {}
+        resources = {}
         if requests_cpu:
-            requests["cpu"] = requests_cpu
+            resources["request_cpu"] = requests_cpu
         if requests_memory:
-            requests["memory"] = requests_memory
+            resources["request_memory"] = requests_memory
         limits = {}
         if limits_cpu:
-            limits["cpu"] = limits_cpu
+            resources["limit_memory"] = limits_cpu
         if limits_memory:
-            limits["memory"] = limits_memory
-        return k8s.V1ResourceRequirements(limits=limits, requests=requests)
+            resources["limit_cpu"] = limits_memory
+        return resources
 
     @property
     def minimal_pod_template(self):
@@ -134,7 +142,7 @@ class NodePodOperator(KubernetesPodOperator):
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {PodGenerator.make_unique_pod_id(self._task_id)}
+  name: {self._task_id}.{uuid.uuid4().hex}
 spec:
   containers:
     - name: base
@@ -157,7 +165,7 @@ spec:
     @staticmethod
     def create_security_context(
         volume_disabled: bool, volume_owner: int
-    ) -> k8s.V1PodSecurityContext:
+    ) -> Dict[str, str]:
         """
         Creates security context based on volume information
         :param volume_disabled:
@@ -165,7 +173,7 @@ spec:
         :return:
         """
         return (
-            k8s.V1PodSecurityContext(fs_group=volume_owner)
+            {fs_group: volume_owner}
             if not volume_disabled
-            else k8s.V1PodSecurityContext()
+            else {}
         )
