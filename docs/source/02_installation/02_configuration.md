@@ -67,9 +67,21 @@ run_config:
         # will be used.
         __default__:
             # Optional labels to be put into pod node selector
-            labels:
+            node_selectors:
                 #Labels are user provided key value pairs
                 node_pool_label/k8s.io: example_value
+            # Optional labels to apply on pods
+            labels:
+                running: airflow
+            # Optional list of kubernetes tolerations
+            tolerations:
+              - key: "group"
+                value: "data-processing"
+                effect: "NoExecute"
+              - key: "group"
+                operator: "Equal",
+                value: "data-processing",
+                effect: "NoSchedule"
             requests:
                 #Optional amount of cpu resources requested from k8s
                 cpu: "1"
@@ -82,8 +94,10 @@ run_config:
                 memory: "1Gi"
         # Other arbitrary configurations to use, for example to indicate some exception resources
         huge_machines:
-            labels:
+            node_selectors:
                 big_node_pool: huge.10x
+            labels:
+                running: airflow-huge
             requests:
                 cpu: "16"
                 memory: "128Gi"

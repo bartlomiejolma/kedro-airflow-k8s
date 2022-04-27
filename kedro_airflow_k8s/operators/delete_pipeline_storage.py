@@ -4,7 +4,7 @@ experiment tasks.
 """
 from typing import Dict
 
-from airflow.operators.python import BaseOperator
+from airflow.operators.python_operator import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from kubernetes import client, config
 

@@ -24,6 +24,9 @@ class TestNodePodOperator(unittest.TestCase):
             node_selector_labels={
                 "size/k8s.io": "huge",
             },
+            labels={
+                "running": "airflow"
+            },
             pipeline="data_science_pipeline",
         )
 
@@ -59,7 +62,8 @@ class TestNodePodOperator(unittest.TestCase):
         assert pod.spec.security_context.fs_group == 100
         assert container.resources.limits == {"cpu": "2", "memory": "10Gi"}
         assert container.resources.requests == {"cpu": "500m", "memory": "2Gi"}
-        assert pod.spec.node_selector == {"size/k8s.io": "huge"}
+        assert pod.spec.node_selectors == {"size/k8s.io": "huge"}
+        assert pod.spec.labels == {"running": "airflow"}
 
     def test_task_create_no_limits_and_requests(self):
         task = NodePodOperator(

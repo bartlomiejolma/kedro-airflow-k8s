@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-05-11
+
 ## [0.4.0] - 2021-04-20
 
 -   Support of S3 as DAG destination
@@ -59,7 +61,9 @@
 
 -   Initial implementation of `kedro_airflow_k8s` plugin stub. 
 
-[Unreleased]: https://github.com/getindata/kedro-airflow-k8s/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/bartlomiejolma/kedro-airflow-k8s/compare/0.5.0...HEAD
+
+[0.5.0]: https://github.com/bartlomiejolma/kedro-airflow-k8s/compare/0.4.0...0.5.0
 
 [0.4.0]: https://github.com/getindata/kedro-airflow-k8s/compare/0.3.0...0.4.0
 
